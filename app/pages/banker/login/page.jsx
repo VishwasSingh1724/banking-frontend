@@ -17,7 +17,7 @@ export default function LoginPage() {
      const user_data = JSON.parse(localStorage.getItem("user"));
  
      if (token || user_data?.isAdmin) {
-       router.push("http://localhost:3000/pages/banker/accountpage");
+       router.push("https://banking-frontend-liard.vercel.app/pages/banker/accountpage");
      } 
    }, []);
   
@@ -64,7 +64,7 @@ export default function LoginPage() {
       localStorage.setItem("token", data.token)
       localStorage.setItem("user", JSON.stringify(data.user))
 
-    router.push("http://localhost:3000/pages/banker/accountpage")
+    router.push("https://banking-frontend-liard.vercel.app/pages/banker/accountpage")
     } catch (error) {
       alert("Login failed. Please check your credentials and try again.")
     } finally {
