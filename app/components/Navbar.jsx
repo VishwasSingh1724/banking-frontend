@@ -1,4 +1,4 @@
-"use client"; // Ensure this is a Client Component
+"use client"; 
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -9,7 +9,7 @@ export default function Navbar() {
   const [token, setToken] = useState(null);
 
   useEffect(() => {
-    setToken(localStorage.getItem("token")); // Read token only on the client
+    setToken(localStorage.getItem("token"));
   }, []);
 
   const Logout = () => {
@@ -22,10 +22,9 @@ export default function Navbar() {
   return (
     <header className="flex justify-between items-center px-8 py-4 border-b border-gray-100">
       <div className="text-xl font-bold text-gray-900 cursor-pointer z-50">
-        <Link href="/">ModernBank</Link>
+        <Link href="/">EnpointeBank</Link>
       </div>
 
-      {/* Render button only after token is checked */}
       {token !== null && (
         <button
           className="text-sm px-4 py-2 bg-gray-100 rounded-md hover:bg-gray-200"
