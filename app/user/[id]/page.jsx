@@ -1,76 +1,112 @@
+"use client"; // Make it a client component
 
-const page = async({params}) => {
-      
-  
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 
-        const id =  await params.id
-           const response = await fetch(`https://banking-backend-s2cq.onrender.com/api/transactions/${id}`)
-           const data = await response.json()
-           const mapData = data.transactions
-           console.log(data.transactions);
-            
+const TransactionsPage = () => {
+  const { id } = useParams(); // ✅ Correct way to get 'id' in Next.js 14+
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!id) return; // Avoid running the effect if 'id' is not available
+
+    const fetchTransactions = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login"); // Redirect if no token
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/transactions/${id}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch transactions");
+
+        const data = await response.json();
+        setTransactions(data.transactions);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, [id]);
+
   return (
-    <div>
-        {
-  
-                    <div className="overflow-x-auto p-12">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-50">
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    Date
-                  </th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    transaction id
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    Type
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    Amount
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {mapData.length > 0 ? (
-                  mapData.map((transaction, index) => (
-                    <tr key={transaction.id || index} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-700">
-                        {new Date(transaction.created_at).toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
-                        {transaction.id}
-                      </td>
-                      <td className="px-4 py-3 text-sm">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            transaction.transaction_type === "deposit"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {transaction.transaction_type}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right font-medium">
-                        <span className={transaction.transaction_type === "deposit" ? "text-green-600" : "text-red-600"}>
-                          ₹{transaction.amount}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="3" className="px-4 py-6 text-sm text-gray-500 text-center">
-                      No transactions found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        }
+    <div className="overflow-x-auto p-12">
+      {loading ? (
+        <p>Loading transactions...</p>
+      ) : transactions.length > 0 ? (
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                Date
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                Transaction ID
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                Type
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                Amount
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {transactions.map((transaction, index) => (
+              <tr key={transaction.id || index} className="hover:bg-gray-50">
+                <td className="px-4 py-3 text-sm text-gray-700">
+                  {new Date(transaction.created_at).toLocaleString()}
+                </td>
+                <td className="px-4 py-3 text-sm text-gray-700">
+                  {transaction.id}
+                </td>
+                <td className="px-4 py-3 text-sm">
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      transaction.transaction_type === "deposit"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {transaction.transaction_type}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-sm text-right font-medium">
+                  <span
+                    className={
+                      transaction.transaction_type === "deposit"
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }
+                  >
+                    ₹{transaction.amount}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="text-center text-gray-500">No transactions found</p>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default TransactionsPage;
