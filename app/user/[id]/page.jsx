@@ -1,27 +1,25 @@
-"use client"; // Make it a client component
+"use client"; // This makes the component client-side
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-const TransactionsPage = () => {
-  const { id } = useParams(); // ✅ Correct way to get 'id' in Next.js 14+
+const TransactionsPage = ({ params }) => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const id = params.id;
 
   useEffect(() => {
-    if (!id) return; // Avoid running the effect if 'id' is not available
-
     const fetchTransactions = async () => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token"); // Get token from localStorage
       if (!token) {
-        router.push("/login"); // Redirect if no token
+        router.push("pages/login"); // Redirect to login if no token is found
         return;
       }
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/transactions/${id}`,
+          `https://banking-backend-s2cq.onrender.com/api/transactions/${id}`,
           {
             method: "GET",
             headers: {
